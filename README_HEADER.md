@@ -1,0 +1,1 @@
+The wan bundle includes two (2) local clusters configured with bi-directional WAN gateways. You can test the bundle immediately after installation. No configurations required.
