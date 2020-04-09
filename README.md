@@ -9,7 +9,7 @@ To understand how the clusters are configured, please see the following WAN exam
 ## Installing Bundle
 
 ```console
-install_bundle -download geode-1.11-cluster-app-ln-ny-perf_test_wan
+install_bundle -download geode-1-cluster-app-ln-ny-perf_test_wan
 ```
 
 ## Use Case
