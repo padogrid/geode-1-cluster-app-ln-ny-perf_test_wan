@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.apache.geode.addon</groupId>
-	<artifactId>geode-1.11-cluster-app-ln-ny-perf_test_wan</artifactId>
+	<artifactId>geode-1-cluster-app-ln-ny-perf_test_wan</artifactId>
 	<packaging>pom</packaging>
 	<name>geode-1-cluster-app-ln-ny-perf_test_wan</name>
 	<version>1.0.0</version>
