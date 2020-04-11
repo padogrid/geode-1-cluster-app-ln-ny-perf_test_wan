@@ -11,7 +11,7 @@ if [ "$HELP" == "true" ]; then
    echo ""
    echo "   Builds the perf_test 'factory' environment for the workspace. It downloads"
    echo "   the dependencies and places them in the workspace's lib directory."
-   echo "      $GEODE_ADDON_WORKSPACE/lib"
+   echo "      $PADOGRID_WORKSPACE/lib"
    echo ""
    echo "   -clean Cleans up the build files after the build completes."
    echo ""
@@ -27,7 +27,7 @@ popd > /dev/null
 # If -all is specified then do not remove the binary files. This option is used
 # when building the geode-addon-all distribution.
 if [ "$ALL" != "true" ]; then
-   cp $APP_DIR/lib/* $GEODE_ADDON_WORKSPACE/lib/
+   cp $APP_DIR/lib/* $PADOGRID_WORKSPACE/lib/
 
    # Remove the build files if the -clean option is specified.
    if [ "$CLEAN" == "true" ]; then
@@ -39,11 +39,11 @@ fi
 # Display build information
 #
 echo ""
-echo "Workspace: $GEODE_ADDON_WORKSPACE"
+echo "Workspace: $PADOGRID_WORKSPACE"
 echo ""
 echo "Downloaded the required library files into the following directory."
 echo ""
-echo "   $GEODE_ADDON_WORKSPACE/lib"
+echo "   $PADOGRID_WORKSPACE/lib"
 echo ""
 echo "CLASSPATH includes the above directory for all apps and clusters running under"
 echo "this workspace. The downloaded files allow you to run the following add-on(s):"

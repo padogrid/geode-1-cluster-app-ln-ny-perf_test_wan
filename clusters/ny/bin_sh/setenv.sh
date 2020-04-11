@@ -21,7 +21,7 @@
 # MySQL and PostgreSQL Hibernate configuration files are provided to get
 # you started. You should copy one of them and enter your DB information.
 # You can include your JDBC driver in the ../pom.xml file and run ./build_app
-# which downloads and places it in the $GEODE_ADDON_WORKSPACE/lib
+# which downloads and places it in the $PADOGRID_WORKSPACE/lib
 # directory. CLASSPATH includes all the jar files in that directory for
 # the apps and clusters running in this workspace.
 #

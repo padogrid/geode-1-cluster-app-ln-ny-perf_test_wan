@@ -146,7 +146,7 @@ public class Order implements PdxSerializable, Comparable<Order>
         ...
 ```
 
-To use `CacheWriterLoaderPkDbImpl `, you must first build the environment by executing the `build_app` script as shown below. This script runs Maven to download the dependency files into the `$GEODE_ADDON_WORKSPACE/lib` directory, which is included in `CLASSPATH` for all the apps and clusters running in the workspace.
+To use `CacheWriterLoaderPkDbImpl `, you must first build the environment by executing the `build_app` script as shown below. This script runs Maven to download the dependency files into the `$PADOGRID_WORKSPACE/lib` directory, which is included in `CLASSPATH` for all the apps and clusters running in the workspace.
 
 ```console
 ./build_app
@@ -156,7 +156,7 @@ Upon successful build, you must also configure the cluster in `cache.xml` file a
 
 ```console
 # Edit cache.xml
-vi $GEODE_ADDON_WORKSPACE/clusters/<your-cluster>/etc/cache.xml
+vi $PADOGRID_WORKSPACE/clusters/<your-cluster>/etc/cache.xml
 ```
 
 Add the following in the `cache.xml` file.
@@ -222,8 +222,8 @@ The above configures the `/nw/customers` and `/nw/orders` maps to store and load
 
 ```console
 # Edit hibernate.cfg.xml
-vi $GEODE_ADDON_WORKSPACE/clusters/<your-cluster>/etc/hibernate.cfg-mysql.xml
-vi $GEODE_ADDON_WORKSPACE/clusters/<your-cluster>/etc/hibernate.cfg-postresql.xml
+vi $PADOGRID_WORKSPACE/clusters/<your-cluster>/etc/hibernate.cfg-mysql.xml
+vi $PADOGRID_WORKSPACE/clusters/<your-cluster>/etc/hibernate.cfg-postresql.xml
 ```
 
 The following is the `hibernate.cfg-mysql.xml` file provided by `geode-addon`. Make sure to replace the database information with your database information such as *password*.
@@ -264,7 +264,7 @@ The following is the `hibernate.cfg-mysql.xml` file provided by `geode-addon`. M
 The Hibernate configuration file path must be provided before you start the cluster. Edit the cluster's `setenv.sh` file and include the path as follows:
 
 ```
-vi $GEODE_ADDON_WORKSPACE/clusters/<your-cluster>/bin_sh/setenv.sh
+vi $PADOGRID_WORKSPACE/clusters/<your-cluster>/bin_sh/setenv.sh
 
 # Set JAVA_OPTS in setenv.sh. Remember, geode-addon uses gfsh to start/stop
 # locators and members. For Java options, you must prepend '--J='.
