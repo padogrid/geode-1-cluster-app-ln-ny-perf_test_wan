@@ -25,15 +25,11 @@ Add a locator and two members to both clusters.
 ```console
 # ny
 switch_cluster ny
-add_locator
-add_member
-add_member
+add_locator; add_member; add_member
 
 # ln
 switch_cluster ln
-add_locator
-add_member
-add_member
+add_locator; add_member; add_member
 ```
 
 Run the clusters.
@@ -57,9 +53,11 @@ You should see the following URLs from the command outputs.
 - ny: [http://localhost:7070/pulse](http://localhost:7070/pulse)
 - ln: [http://localhost:7080/pulse](http://localhost:7080/pulse)
 
+:exclamation: Note that only one instance of Pulse can be viewed per browser. For example, view `ny` from Chrome and `ln` from Firefox.
+
 ## Running `perf_test_wan`
 
-The included `perf_test_wan` app is the same `perf_test` app that you can also create by running the `create_app` command. There are no configuration differences between the two. Either one will properly populate data into both clusters.
+The included `perf_test_wan` app is the same `perf_test` app that you can also install by running the `create_app` command. There are no configuration differences between the two. Either one will properly populate data into both clusters.
 
 The `perf_test_wan` app connects to the `ny` cluster so the `ny` cluster is the sender and `ln` is the receiver.
 
