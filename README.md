@@ -4,7 +4,7 @@ The `wan` bundle includes two (2) local clusters configured with bi-directional 
 
 To understand how the clusters are configured, please see the following WAN example. It provides step-by-step instructions for creating and running WAN enabled clusters from scratch.
 
-[https://github.com/javapark1/geode-addon/blob/master/doc/WAN-Example.md](https://github.com/javapark1/geode-addon/blob/master/doc/WAN-Example.md)
+[Geode WAN Example](https://github.com/padogrid/padogrid/wiki/Geode-WAN-Example)
 
 ## Installing Bundle
 
