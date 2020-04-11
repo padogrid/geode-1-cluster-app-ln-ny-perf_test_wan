@@ -50,8 +50,8 @@ show_cluster -long -cluster ln
 
 You should see the following URLs from the command outputs.
 
-- ny: [http://localhost:7070/pulse](http://localhost:7070/pulse)
-- ln: [http://localhost:7080/pulse](http://localhost:7080/pulse)
+- **ny:** [http://localhost:7070/pulse](http://localhost:7070/pulse)
+- **ln:** [http://localhost:7080/pulse](http://localhost:7080/pulse)
 
 :exclamation: Note that only one instance of Pulse can be viewed per browser. For example, view `ny` from Chrome and `ln` from Firefox.
 
