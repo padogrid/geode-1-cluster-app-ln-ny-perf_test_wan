@@ -6,9 +6,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>padogrid.addon</groupId>
-	<artifactId>geode-1-cluster-app-ln-ny-perf_test_wan</artifactId>
+	<artifactId>bundle-geode-1-app-perf_test_wan-cluster-ln-ny</artifactId>
 	<packaging>pom</packaging>
-	<name>geode-1-cluster-app-ln-ny-perf_test_wan</name>
+	<name>${project.artifactId}</name>
 	<version>1.0.0</version>
 	<description>WAS test bundle</description>
 
