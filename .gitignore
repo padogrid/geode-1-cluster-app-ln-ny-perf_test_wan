@@ -11,3 +11,28 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 .project
 .settings
+
+# vi
+*.swp
+
+# PadoGrid workspace
+/.addonenv.sh
+/initenv.sh
+/setenv.sh
+bundles
+lib
+plugins
+
+# PadoGrid workspace directories
+apps
+clusters
+docker
+#k8s
+pods
+
+# Bundle specifics
+archive
+log
+lib
+desktop
+build

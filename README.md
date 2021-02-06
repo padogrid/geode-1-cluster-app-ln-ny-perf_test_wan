@@ -8,7 +8,7 @@ To understand how the clusters are configured, please see the following WAN exam
 
 ## Installing Bundle
 
-```console
+```bash
 install_bundle -download bundle-geode-1-app-perf_test_wan-cluster-ln-ny
 ```
 
@@ -16,13 +16,13 @@ install_bundle -download bundle-geode-1-app-perf_test_wan-cluster-ln-ny
 
 In this use case, two (2) local clusters are configured to replicate select  Geode/GemFire regions across the WAN. With the included `perf_test_wan` app you can ingest data into the `ny` cluster and monitor the WAN replication taking place into the `ln` cluster using Geode/GemFire Pulse in the browser.
 
-![WAN Diagram](/images/wan-ny-ln.png)
+![WAN Diagram](images/wan-ny-ln.png)
 
 ## Running Clusters
 
 Add a locator and two members to both clusters.
 
-```console
+```bash
 # ny
 switch_cluster ny
 add_locator; add_member; add_member
@@ -34,7 +34,7 @@ add_locator; add_member; add_member
 
 Run the clusters.
 
-```console
+```bash
 start_cluster -cluster ny
 start_cluster -cluster ln
 ```
@@ -43,7 +43,7 @@ start_cluster -cluster ln
 
 The clusters can be monitored in a number of ways, i.e., by Pulse, gfsh, VSD, JMX, Grafana, geode-addon, etc. Let's use Pulse for our example. You can view the gateway sender activities from Pulse. To get the Pulse URLs for both clusters run the following:
 
-```console
+```bash
 show_cluster -long -cluster ny
 show_cluster -long -cluster ln
 ```
@@ -63,19 +63,19 @@ The `perf_test_wan` app connects to the `ny` cluster so the `ny` cluster is the 
 
 Change directory into the `perf_test_wan`'s `bin_sh` directory.
 
-```console
+```bash
 cd_app perf_test_wan; cd bin_sh
 ```
 
 First, ingest data into the `eligibility` and `profile` regions. 
 
-```console
+```bash
 ./test_ingestion -run
 ```
 
 Next, generate transactional data into the `summary` region which is configured to replicate between the clusters.
 
-```console
+```bash
 ./test_tx -run
 ```
 
@@ -83,7 +83,7 @@ Next, generate transactional data into the `summary` region which is configured 
 
 If you want to send from the `ln` cluster to the `ny` cluster then change the locator port in the `client-cache.xml` file.
 
-```console
+```bash
 cd_app perf_test_wan
 vi etc/client-cache.xml
 ```
@@ -98,14 +98,14 @@ Change the locator port number from 10333 (ny) to 10344 (ln).
 
 Run `test_tx` as before.
 
-```console
+```bash
 cd bin_sh
 ./test_tx -run
 ```
 
 ## Tearing Down
 
-```console
+```bash
 stop_cluster -all -cluster ny
 stop_cluster -all -cluster ln
 ```
