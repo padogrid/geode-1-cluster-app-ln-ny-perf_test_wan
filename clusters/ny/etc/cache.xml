@@ -12,7 +12,7 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	</gateway-sender>
 	
 	<!-- Gateway receiver -->
-	<gateway-receiver start-port="5010" end-port="5020">
+	<gateway-receiver start-port="50510" end-port="50520">
 	</gateway-receiver>
 	
 	<!-- cache-server port is assigned by geode-addon at member startup.

@@ -22,6 +22,9 @@ buildNumber.properties
 bundles
 lib
 plugins
+.workspace
+.cluster
+*.sh0
 
 # PadoGrid workspace directories
 apps
