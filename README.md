@@ -52,7 +52,7 @@ Run the clusters by executing one of the following options.
 
 ```bash
 # Start both (all) clusters in the workspace
-start_workspace
+start_workspace -quiet
 
 # You can also start clusters individually as follows
 start_cluster -cluster ny
