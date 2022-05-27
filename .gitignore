@@ -30,10 +30,10 @@ plugins
 *.sh0
 
 # PadoGrid workspace directories
-apps
-clusters
+#apps
+#clusters
 docker
-#k8s
+k8s
 pods
 
 # Bundle specifics
