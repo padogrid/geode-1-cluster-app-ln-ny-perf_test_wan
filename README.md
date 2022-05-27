@@ -94,10 +94,10 @@ Content of `cache.xml`:
 
 ```xml
   ...
-	<!-- Parallel event queue for summary -->
-	<gateway-sender id="ny-to-ln-summary" remote-distributed-system-id="2"
-		parallel="true" dispatcher-threads="5" maximum-queue-memory="150">
-	</gateway-sender>
+  <!-- Parallel event queue for summary -->
+  <gateway-sender id="ny-to-ln-summary" remote-distributed-system-id="2"
+      parallel="true" dispatcher-threads="5" maximum-queue-memory="150">
+  </gateway-sender>
   ...
 ```
       
@@ -165,9 +165,9 @@ Content of `cache.xml`:
 ```xml
   ...
   <!-- Parallel event queue -->
-	<gateway-sender id="ny-to-ln-parallel" remote-distributed-system-id="2"
-		parallel="true" dispatcher-threads="5" maximum-queue-memory="150" order-policy="partition">
-	</gateway-sender>
+  <gateway-sender id="ny-to-ln-parallel" remote-distributed-system-id="2"
+      parallel="true" dispatcher-threads="5" maximum-queue-memory="150" order-policy="partition">
+  </gateway-sender>
   ...
 ```
 
@@ -215,9 +215,9 @@ Content of `cache.xml`:
   ...
   <!-- Serial event queue -->
   <gateway-sender id="ny-to-ln-serial" remote-distributed-system-id="2"
-		parallel="false" dispatcher-threads="5" maximum-queue-memory="150"
-		order-policy="key">
-	</gateway-sender>
+      parallel="false" dispatcher-threads="5" maximum-queue-memory="150"
+      order-policy="key">
+  </gateway-sender>
   ...
 ```
 
