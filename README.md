@@ -24,6 +24,17 @@ In this use case, two (2) local clusters are configured to replicate select  Geo
 
 ![WAN Diagram](images/wan-ny-ln.png)
 
+## Bundle Contents
+
+```console
+apps
+└── perf_test_wan
+
+clusters
+├── ln
+└── ny
+```
+
 ## Startup Sequence
 
 ### 1. Switch Workspace
