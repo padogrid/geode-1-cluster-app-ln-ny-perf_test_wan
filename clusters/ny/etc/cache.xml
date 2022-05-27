@@ -7,10 +7,20 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	is-server="false" copy-on-read="false">
 
 	<!-- Gateway sender -->
-	<gateway-sender id="ny-to-ln" remote-distributed-system-id="2" parallel="true"
-		dispatcher-threads="2" maximum-queue-memory="150" order-policy="partition">
+	<!-- Parallel event queue for summary -->
+	<gateway-sender id="ny-to-ln-summary" remote-distributed-system-id="2"
+		parallel="true" dispatcher-threads="5" maximum-queue-memory="150">
 	</gateway-sender>
-	
+	<!-- Parallel event queue -->
+	<gateway-sender id="ny-to-ln-parallel" remote-distributed-system-id="2"
+		parallel="true" dispatcher-threads="5" maximum-queue-memory="150" order-policy="partition">
+	</gateway-sender>
+	<!-- Serial event queue -->
+	<gateway-sender id="ny-to-ln-serial" remote-distributed-system-id="2" 
+		parallel="false" dispatcher-threads="5" maximum-queue-memory="150" 
+		order-policy="key">
+	</gateway-sender>
+
 	<!-- Gateway receiver -->
 	<gateway-receiver start-port="50510" end-port="50520">
 	</gateway-receiver>
@@ -35,7 +45,7 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	<region name="profile" refid="PARTITION">
 	</region>
 	<region name="summary" refid="PARTITION">
-			<region-attributes gateway-sender-ids="ny-to-ln"></region-attributes>
+			<region-attributes gateway-sender-ids="ny-to-ln-summary"></region-attributes>
 	</region>
 
 	<!-- Microsoft's Northwind data regions accessed by the perf_test app. -->
@@ -54,8 +64,13 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	</region>
 	
 	<!-- Example regions accessed by the perf_test app's GroupTest (bin_sh/test_group) -->
-	<region name="map1" refid="PARTITION"></region>
-	<region name="map2" refid="PARTITION"></region>
+	<region name="map1" refid="PARTITION">
+		<region-attributes gateway-sender-ids="ny-to-ln-parallel"></region-attributes>
+	</region>
+	<!-- Example regions accessed by the perf_test app's GroupTest (bin_sh/test_group) -->
+	<region name="map2" refid="PARTITION">
+		<region-attributes gateway-sender-ids="ny-to-ln-serial"></region-attributes>
+	</region>
 	<region name="map3" refid="PARTITION"></region>
 	<region name="map4" refid="PARTITION"></region>
 	<region name="map5" refid="PARTITION"></region>

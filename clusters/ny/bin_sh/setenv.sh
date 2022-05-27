@@ -45,3 +45,9 @@
 # Although it is not required, your script should be placed in the bin_sh directory.
 #
 #RUN_SCRIPT=$CLUSTER_DIR/bin_sh/your-script
+
+# Number of servers (members) to configure with a serial gateway
+SERIAL_GATEWAY_SERVER_COUNT=2
+if [[ "$MEMBER_NUM" -gt $SERIAL_GATEWAY_SERVER_COUNT ]]; then
+  CONFIG_FILE=$ETC_DIR/cache-no-serial.xml  
+fi

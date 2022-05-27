@@ -15,6 +15,9 @@ buildNumber.properties
 # vi
 *.swp
 
+# vscode
+workspace.code-workspace
+
 # PadoGrid workspace
 /.addonenv.sh
 /initenv.sh

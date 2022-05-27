@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://geode.apache.org/schema/cache"
-	xsi:schemaLocation="http://geode.apache.org/schema/cache 
-http://geode.apache.org/schema/cache/cache-1.0.xsd"
-	version="1.0" lock-lease="120" lock-timeout="60" search-timeout="300"
-	is-server="false" copy-on-read="false">
+<cache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://geode.apache.org/schema/cache" xsi:schemaLocation="http://geode.apache.org/schema/cache 
+http://geode.apache.org/schema/cache/cache-1.0.xsd" version="1.0" lock-lease="120" lock-timeout="60" search-timeout="300" is-server="false" copy-on-read="false">
 
-	<!-- Gateway sender -->
-	<gateway-sender id="ln-to-ny" remote-distributed-system-id="1" parallel="true"
-		dispatcher-threads="2" maximum-queue-memory="150" order-policy="partition">
+	<!-- ======= Gateway senders ======= -->
+	<!-- Parallel event queue for summary -->
+	<gateway-sender id="ln-to-ny-summary" remote-distributed-system-id="1" 
+		parallel="true" dispatcher-threads="5" maximum-queue-memory="150"></gateway-sender>
+	<!-- Parallel event queue -->
+	<gateway-sender id="ln-to-ny-parallel" remote-distributed-system-id="1" 
+		parallel="true" dispatcher-threads="5" maximum-queue-memory="150"></gateway-sender>
+	<!-- Serial event queue -->
+	<gateway-sender id="ln-to-ny-serial" remote-distributed-system-id="1" 
+		parallel="false" dispatcher-threads="5" maximum-queue-memory="150" 
+		order-policy="key">
 	</gateway-sender>
-	
+
 	<!-- Gateway receiver -->
-	<gateway-receiver start-port="50520" end-port="50530">
-	</gateway-receiver>
-	
+	<gateway-receiver start-port="50520" end-port="50530"></gateway-receiver>
+
 	<!-- cache-server port is assigned by geode-addon at member startup.
 	     If you have a multi-homed machine then make sure to set the bind-address
 	     and hostname-for-clients attributes with the proper IP address. -->
-	<cache-server port="${geode-addon.server.port}"/>
-	
+	<cache-server port="${geode-addon.server.port}" />
+
 	<!-- PBM example regions accessed by the perf_test app's
 	     DataIngestionTest (bin_sh/test_ingestion) and 
-	     TransactionTest (bin_sh/test_tx). -->	
-	<region name="eligibility" refid="PARTITION">
-	</region>
-	<region name="profile" refid="PARTITION">
-	</region>
+	     TransactionTest (bin_sh/test_tx). -->
+	<region name="eligibility" refid="PARTITION"></region>
+	<region name="profile" refid="PARTITION"></region>
 	<region name="summary" refid="PARTITION">
-		<region-attributes gateway-sender-ids="ln-to-ny"></region-attributes>
+		<region-attributes gateway-sender-ids="ln-to-ny-summary"></region-attributes>
 	</region>
 
 	<!-- Microsoft's Northwind data regions accessed by the perf_test app. -->
@@ -45,10 +46,14 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 		<region name="suppliers" refid="PARTITION"></region>
 		<region name="territories" refid="PARTITION"></region>
 	</region>
-	
+
 	<!-- Example regions accessed by the perf_test app's GroupTest (bin_sh/test_group) -->
-	<region name="map1" refid="PARTITION"></region>
-	<region name="map2" refid="PARTITION"></region>
+	<region name="map1" refid="PARTITION">
+		<region-attributes gateway-sender-ids="ln-to-ny-parallel"></region-attributes>
+	</region>
+	<region name="map2" refid="PARTITION">
+		<region-attributes gateway-sender-ids="ln-to-ny-serial"></region-attributes>
+	</region>
 	<region name="map3" refid="PARTITION"></region>
 	<region name="map4" refid="PARTITION"></region>
 	<region name="map5" refid="PARTITION"></region>
@@ -69,7 +74,7 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	<region name="map20" refid="PARTITION"></region>
 	<region name="map21" refid="PARTITION"></region>
 	<region name="map22" refid="PARTITION"></region>
-	
+
 	<!-- EligFunction invoked by TransationTest (bin_sh/test_tx). -->
 	<function-service>
 		<function>
