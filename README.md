@@ -14,7 +14,7 @@ Install the bundle as a workspace by executing one of the following:
 # To run
 install_bundle -download -workspace bundle-geode-1-app-perf_test_wan-cluster-ln-ny
 
-# # To run and/or check in
+# To run and/or check in
 install_bundle -checkout bundle-geode-1-app-perf_test_wan-cluster-ln-ny
 ```
 
