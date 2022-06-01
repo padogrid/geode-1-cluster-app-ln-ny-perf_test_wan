@@ -15,6 +15,10 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	<gateway-sender id="ny-to-ln-parallel" remote-distributed-system-id="2"
 		parallel="true" dispatcher-threads="5" maximum-queue-memory="150" order-policy="partition">
 	</gateway-sender>
+	<!-- Customers event queue -->
+	<gateway-sender id="ny-to-ln-customers" remote-distributed-system-id="2"
+		parallel="true" dispatcher-threads="5" maximum-queue-memory="150" order-policy="partition">
+	</gateway-sender>
 	<!-- Serial event queue -->
 	<gateway-sender id="ny-to-ln-serial" remote-distributed-system-id="2" 
 		parallel="false" dispatcher-threads="5" maximum-queue-memory="150" 
@@ -30,12 +34,20 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	     and hostname-for-clients attributes with the proper IP address. -->
 	<cache-server port="${geode-addon.server.port}"/>
 	
-	<!-- 
-	=============================================================
-	The regions defined here are for the perf_test app. Replace 
-	them with your regions. 
-	============================================================= 
-	-->
+	<!-- Partition resolver for co-locating customers data. The key
+	     must be a string key with the second token set to the customer ID.
+	     For example, an order key, 'k123.000000-0001', shows '000000-0001' 
+	     as a customer ID. The default delimiter is '.'-->
+	<region-attributes id="customerIdentityKey">
+		<partition-attributes colocated-with="/nw/customers">
+			<partition-resolver>
+				<class-name>org.apache.geode.addon.cluster.cache.IdentityKeyPartitionResolver</class-name>
+				<parameter name="indexes">
+					<string>1</string>
+				</parameter>
+			</partition-resolver>
+		</partition-attributes>
+	</region-attributes> 
 	     
 	<!-- PBM example regions accessed by the perf_test app's
 	     DataIngestionTest (bin_sh/test_ingestion) and 
@@ -45,16 +57,20 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	<region name="profile" refid="PARTITION">
 	</region>
 	<region name="summary" refid="PARTITION">
-			<region-attributes gateway-sender-ids="ny-to-ln-summary"></region-attributes>
+			<region-attributes gateway-sender-ids="ny-to-ln-summary" />
 	</region>
 
 	<!-- Microsoft's Northwind data regions accessed by the perf_test app. -->
 	<region name="nw">
 		<region name="categories" refid="PARTITION"></region>
-		<region name="customers" refid="PARTITION"></region>
+		<region name="customers" refid="PARTITION">
+			<region-attributes gateway-sender-ids="ny-to-ln-customers" />
+		</region>
 		<region name="employees" refid="PARTITION"></region>
 		<region name="employee_territories" refid="PARTITION"></region>
-		<region name="orders" refid="PARTITION"></region>
+		<region name="orders" refid="PARTITION">
+			<region-attributes refid="customerIdentityKey" gateway-sender-ids="ny-to-ln-customers" />
+		</region>
 		<region name="order_details" refid="PARTITION"></region>
 		<region name="products" refid="PARTITION"></region>
 		<region name="regions" refid="PARTITION"></region>
@@ -65,11 +81,11 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	
 	<!-- Example regions accessed by the perf_test app's GroupTest (bin_sh/test_group) -->
 	<region name="map1" refid="PARTITION">
-		<region-attributes gateway-sender-ids="ny-to-ln-parallel"></region-attributes>
+		<region-attributes gateway-sender-ids="ny-to-ln-parallel" />
 	</region>
 	<!-- Example regions accessed by the perf_test app's GroupTest (bin_sh/test_group) -->
 	<region name="map2" refid="PARTITION">
-		<region-attributes gateway-sender-ids="ny-to-ln-serial"></region-attributes>
+		<region-attributes gateway-sender-ids="ny-to-ln-serial" />
 	</region>
 	<region name="map3" refid="PARTITION"></region>
 	<region name="map4" refid="PARTITION"></region>
@@ -92,14 +108,21 @@ http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	<region name="map21" refid="PARTITION"></region>
 	<region name="map22" refid="PARTITION"></region>
 	
-	<!-- EligFunction invoked by TransationTest (bin_sh/test_tx). -->
 	<function-service>
+		<!-- ClearFunction clears the specified region. Geode does not permit clearing 
+			partitioned regions. Furthermore, clients are not permitted to clear remote
+			regions. This function allows clients to clear both partitioned and replicated
+			regions. -->
+		<function>
+            <class-name>org.apache.geode.addon.function.ClearFunction</class-name>
+        </function>
+        <!-- QueryFunction executes OQL with joins on co-located regions. -->
 		<function>
 			<class-name>org.apache.geode.addon.function.QueryFunction</class-name>
 		</function>
+		<!-- EligFunction invoked by TransationTest (bin_sh/test_tx). -->
 		<function>
 			<class-name>org.apache.geode.addon.test.perf.EligFunction</class-name>
 		</function>
 	</function-service>
-
 </cache>

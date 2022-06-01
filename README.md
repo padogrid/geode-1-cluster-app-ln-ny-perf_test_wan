@@ -241,6 +241,189 @@ cd_app perf_test_wan/bin_sh
 
 Monitor the Pulse instances to view data getting replicated from `ny` to `ln`.
 
+### Test Case 4. Parallel Gateway - Co-located Regions `/nw/customers` and `/nw/orders`
+
+In this test case, we WAN-replicate two (2) regions that have been co-located. The `/nw/customers` and `/nw/orders` regions have been preconfigured to co-locate data using the PadoGrid's [`IdentityKeyPartitionResolver`](https://github.com/padogrid/padogrid/blob/develop/geode-addon-core/src/main/java/org/apache/geode/addon/cluster/cache/IdentityKeyPartitionResolver.java). You can view the configuration file as follows.
+
+```bash
+cd_cluster ny/etc
+vi cache.xml
+```
+
+Content of `cache.xml`
+
+```xml
+...
+	<region-attributes id="customerIdentityKey">
+		<partition-attributes colocated-with="/nw/customers">
+			<partition-resolver>
+				<class-name>org.apache.geode.addon.cluster.cache.IdentityKeyPartitionResolver</class-name>
+				<parameter name="indexes">
+					<string>1</string>
+				</parameter>
+			</partition-resolver>
+		</partition-attributes>
+	</region-attributes>
+  ...
+  <region name="nw">
+    ...
+    <region name="customers" refid="PARTITION">
+      <region-attributes gateway-sender-ids="ny-to-ln-customers" />
+    </region>
+    ...
+    <region name="orders" refid="PARTITION">
+      <region-attributes refid="customerIdentityKey" gateway-sender-ids="ny-to-ln-customers" />
+    </region>
+  ...
+  </region>
+...
+```
+
+`IdentityKeyPartitionResolver` is a generic partition resolver that works with any string keys conforming to the following default format.
+
+```console
+<key>.<routing-key>
+```
+
+For our test case, we supply the customer ID as the routing key as follows.
+
+```console
+<key>.<customerId>
+```
+
+For example, if the customer's key is `000000-0017` in the `/nw/customers` region, then the orders belonging to that customer in the `/nw/orders` region would have keys similar to the following.
+
+```console
+k0000009651.000000-0017
+k0000000869.000000-0017
+k0000002724.000000-0017
+k0000003384.000000-0017
+...
+```
+
+
+:pencil2: *`IdentityKeyPartitionResolver` supports keys with delimiters other than '.' (period),  multiple delimiters, and difference delimiter sequences.*
+
+Note that the `/nw/customers` region is not configured with the `customerIdentityKey` region attributes. This is because the routing keys are customer IDs, and customer IDs are actual keys for the `/nw/customers` region. If we have configured the `/nw/customers` with the same `customerIdentityKey` region attributes, then we will see the following error message in the member log files.
+
+```console
+java.lang.IllegalStateException: Region specified in 'colocated-with' (/nw/customers) for region /nw/customers does not exist. It should be created before setting 'colocated-with' attribute for this region.
+```
+
+Let's now ingest data into the `/nw/customers` and `/nw/orders` regions.
+
+```bash
+cd_app perf_test_wan/bin_sh
+./test_group -prop ../etc/group-factory.properties -run
+```
+
+Monitor both Pulse instances to see the regions getting populated.
+
+One of the benefits of co-located data is that you can join regions together using OQL. This can only be done in functions, however. PadoGrid provides another generic plugin that we can use for this purpose. The `addon.QueryFunction` plugin has already been deployed in the PadoGrid workspace and we can simply run the following OQL statement using the `curl` command to join `/nw/customers` and `/nw/orders`.
+
+OQL:
+
+```sql
+select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId limit 100
+```
+
+Execute the following `curl` command to invoke the `addon.QueryFunction`.
+
+```bash
+curl -X POST "http://localhost:7080/geode/v1/functions/addon.QueryFunction?onRegion=%2Fnw%2Forders" \
+     -H "accept: application/json" -H "Content-Type: application/json" \
+     -d "[ { \"@type\": \"String\",\"@value\": \"select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId limit 100\"}]"
+```
+
+You should see outputs similar to the following.
+
+```console
+[ [ {
+  "c" : {
+    "createdOn" : "06/01/2022",
+    "updatedOn" : "06/01/2022",
+    "customerId" : "000000-0017",
+    "companyName" : "Russel-Barrows",
+    "contactName" : "McDermott",
+    "contactTitle" : "Central Manager",
+    "address" : "Apt. 892 5479 Dewitt Bypass, Eulahborough, NH 90390",
+    "city" : "South Zackaryview",
+    "region" : "MD",
+    "postalCode" : "19374-0549",
+    "country" : "Uruguay",
+    "phone" : "1-423-878-7980",
+    "fax" : "258-478-9848"
+  },
+  "o" : {
+    "createdOn" : "06/01/2022",
+    "updatedOn" : "06/01/2022",
+    "orderId" : "k0000007416",
+    "customerId" : "000000-0017",
+    "employeeId" : "705328+5656",
+    "orderDate" : "05/27/2022",
+    "requiredDate" : "06/02/2022",
+    "shippedDate" : "06/01/2022",
+    "shipVia" : "4",
+    "freight" : 95.39,
+    "shipName" : "Cassin LLC",
+    "shipAddress" : "Suite 215 1566 Sipes Meadows, West Terrance, WY 31508-9261",
+    "shipCity" : "New Genaroview",
+    "shipRegion" : "ND",
+    "shipPostalCode" : "78439",
+    "shipCountry" : "Germany"
+  }
+}, {
+...
+```
+
+You can also execute the query using the Swagger UI. The Swagger UI URLs can be obtained by running `show_bundle -long` as follows.
+
+```bash
+show_cluster -long -cluster ny
+show_cluster -long -cluster ln
+```
+
+Output:
+
+```
+...
+01        Member: ln-padomac.local-01
+           STATE: Running
+             PID: 81065
+     MEMBER_PORT: 40414
+ MEMBER_HTTP_URL: http://localhost:7090/geode/swagger-ui.html
+...
+02        Member: ln-padomac.local-02
+           STATE: Running
+             PID: 81066
+     MEMBER_PORT: 40415
+ MEMBER_HTTP_URL: http://localhost:7091/geode/swagger-ui.html
+...
+```
+
+Go to one fo the Swagger UI URLs and enter the following and click on the **Execute** button.
+
+- argsInBody:
+
+```json
+[{"@type": "String",
+"@value": "select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId" }]
+```
+
+- functionId:
+
+```console
+addon.QueryFunction
+```
+
+- onRegion:
+
+```console
+/nw/orders
+```
+
+![Swagger Screenshopt](images/swagger-addon-query-function.png)
+
 ## Teardown
 
 ```bash
