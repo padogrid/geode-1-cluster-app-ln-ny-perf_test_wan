@@ -92,6 +92,11 @@ You should see the following URLs from the command outputs.
 
 ## Test Cases
 
+- [Test Case 1. Parallel Gateway - Region `summary`](#test-case-1-parallel-gateway---region-summary)
+- [Test Case 2. Parallel Gateway - Region `map1`](#test-case-2-parallel-gateway---region-map1)
+- [Test Case 3. Serial Gateway - Region `map2`](#test-case-3-serial-gateway---region-map2)
+- [Test Case 4. Parallel Gateway - Co-located Regions `/nw/customers` and `/nw/orders`](#test-case-4-parallel-gateway---co-located-regions-nwcustomers-and-nworders)
+
 ### Test Case 1. Parallel Gateway - Region `summary`
 
 In this test case, we replicate data from the `ny` cluster to the `ln` cluster using **parallel** gatway senders. Both clusters have been configured with a parallel gateway named, `ny-to-ln-summary`. You can view the configuration file as follows.
