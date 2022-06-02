@@ -463,7 +463,7 @@ addon.QueryFunction
 - onRegion:
 
 ```console
-/nw/orders
+/nw/customers
 ```
 
 ![Swagger Screenshopt](images/swagger-addon-query-function.png)
