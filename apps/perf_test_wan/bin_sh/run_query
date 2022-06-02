@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+# ========================================================================
+# Copyright (c) 2020-2022 Netcrest Technologies, LLC. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========================================================================
+
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+. $SCRIPT_DIR/.addonenv.sh
+
+EXECUTABLE="`basename $0`"
+DEFAULT_QUERY="select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100"
+
+if [ "$HELP" == "true" ]; then
+cat <<EOF
+
+NAME
+   $EXECUTABLE - Execute 'addon.QueryFunction' via the REST API to execute ad-hoc queries
+
+SYNOPSIS
+   $EXECUTABLE [-cluster cluster_name] [-num member_number] [-region target_region_path] [-query "oql_statement"] [-?]
+
+DESCRIPTION
+   Executes 'addon.QueryFunction' via the REST API to execute ad-hoc queries. If the '-query' option
+   is not specified then it executes the following equi-join query statement.
+
+   $DEFAULT_QUERY
+
+   By default, the REST API is invoked on the first member of the current cluster. You can target
+   a specific cluster and member using the '-cluster' and '-num' options, respective.
+
+   Note that 'addon.QueryFunction' is executed using 'onRegion'. This means the target region to
+   execute the function on must be a partitioned region. This script assigns the target region
+   to the first region path found in the 'from' clause. Optionally, you can specify the target
+   region using the '-region' option.
+
+OPTIONS
+   -query "oql_statement"
+             OQL query statement in double quotes. If this option is not specified then it defaults
+             to the equi-join statement shown above.
+
+   -cluster cluster_name
+             Cluster name. Default: $CLUSTER
+
+   -num member_number
+             The number of member to execute the REST API on. Default: 1
+
+   -region target_region_path
+             The target region to execute the query, i.e., onRegion. If this option is not specified
+             then this script assigns the first region extracted from the 'from' clause as the target
+             region.
+             
+DEFAULT
+   ./$EXECUTABLE -cluster $CLUSTER -num $MEMBER_NUM_NO_LEADING_ZERO -query "$DEFAULT_QUERY"
+
+EOF
+   exit
+fi
+
+# If HTTP is disabled, then exit
+MEMBER_HTTP_ENABLED=`getClusterProperty "http.enabled" $DEFAULT_MEMBER_HTTP_ENABLED`
+if [ "$MEMBER_HTTP_ENABLED" != "true" ]; then
+   echo -e "${CLightRed}ERROR:${CNone} HTTP URL disabled. Please set 'http.enabled=true' in the following file and restart the cluster."
+   echo "   $CLUSTER_DIR/etc/cluster.properties"
+   exit 1
+fi
+
+# --- Begin: set target member ---
+
+# Determine host name
+NODE=`getOsNodeName`
+OS_ENV=`getOsEnv $NODE`
+MEMBER_PREFIX=`getMemberPrefix`
+if [ "$OS_ENV" == "hh" ]; then
+   NODE_LOCAL=`getOsNodeName`
+else
+   NODE=${NODE_NAME_PREFIX}-$MEMBER_NUM
+   NODE_LOCAL=`getOsNodeName $NODE`
+fi
+HOSTNAME_FOR_CLIENTS=`getClusterProperty "cluster.hostnameForClients" "$NODE"`
+
+# Determine port number
+MEMBER_HTTP_START_PORT=`getClusterProperty "http.startPort" $DEFAULT_MEMBER_HTTP_START_PORT`
+echo DEFAULT_MEMBER_HTTP_START_PORT=$DEFAULT_MEMBER_HTTP_START_PORT
+echo MEMBER_HTTP_START_PORT=$MEMBER_HTTP_START_PORT
+let HTTP_PORT=MEMBER_HTTP_START_PORT+MEMBER_NUM_NO_LEADING_ZERO-1
+
+# Set target member
+TARGET_MEMBER="$HOSTNAME_FOR_CLIENTS:$HTTP_PORT"
+
+# --- End: set target member ---
+
+# Determine the target region for onRegion
+if [ "$QUERY" == "" ]; then
+   QUERY="$DEFAULT_QUERY"
+fi
+
+if [ "$REGION" != "" ]; then
+   TARGET_REGION=$REGION
+else
+   TARGET_REGION=${QUERY#*[fF][rR][oO][mM] }
+   TARGET_REGION=$(echo $TARGET_REGION | awk '{print $1}')
+   TARGET_REGION=$(echo $TARGET_REGION | sed 's/\//%2F/g')
+fi
+
+echo ""
+echo "Executing addon.QueryFunction on cluster $CLUSTER - $TARGET_MEMBER"
+echo "   $QUERY"
+echo ""
+curl -X POST "http://$TARGET_MEMBER/geode/v1/functions/addon.QueryFunction?onRegion=$TARGET_REGION" \
+     -H "accept: application/json" -H "Content-Type: application/json" \
+     -d "[ { \"@type\": \"String\",\"@value\": \"$QUERY\"}]"
+echo ""
+echo "Executed addon.QueryFunction on cluster $CLUSTER - $TARGET_MEMBER"
+echo "   $QUERY"
+echo ""

@@ -315,21 +315,35 @@ Note that the `/nw/customers` region is not configured with the `customerIdentit
 java.lang.IllegalStateException: Region specified in 'colocated-with' (/nw/customers) for region /nw/customers does not exist. It should be created before setting 'colocated-with' attribute for this region.
 ```
 
-Let's now ingest data into the `/nw/customers` and `/nw/orders` regions.
+Before we can ingest mock data into the /nw/customers` and `/nw/orders` regions, we need to run the `build_app` script to download the `javafaker` package.
 
 ```bash
 cd_app perf_test_wan/bin_sh
+./build_app
+```
+
+Let's now ingest mock data into the `/nw/customers` and `/nw/orders` regions.
+
+```bash
+cd_app perf_test_wan/bin_sh
+
+# PadoGrid v0.9.17 or above - provides more quantized entity relationships
+./test_group -prop ../etc/group-factory-er.properties -run
+
+# PadoGrid v0.9.16 or less
 ./test_group -prop ../etc/group-factory.properties -run
 ```
 
 Monitor both Pulse instances to see the regions getting populated.
 
-One of the benefits of co-located data is that you can join regions together using OQL. This can only be done in functions, however. PadoGrid provides another generic plugin that we can use for this purpose. The `addon.QueryFunction` plugin has already been deployed in the PadoGrid workspace and we can simply run the following OQL statement using the `curl` command to join `/nw/customers` and `/nw/orders`.
+### REST API
+
+One of the benefits of co-located data is that you can equi-join regions together using OQL. This can only be done in functions, however. PadoGrid provides another generic plugin that we can use for this purpose. The `addon.QueryFunction` plugin has already been deployed in the PadoGrid workspace and we can simply run the following OQL statement using the `curl` command to equi-join `/nw/customers` and `/nw/orders`.
 
 OQL:
 
 ```sql
-select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId limit 100
+select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100
 ```
 
 Execute the following `curl` command to invoke the `addon.QueryFunction`.
@@ -337,7 +351,7 @@ Execute the following `curl` command to invoke the `addon.QueryFunction`.
 ```bash
 curl -X POST "http://localhost:7080/geode/v1/functions/addon.QueryFunction?onRegion=%2Fnw%2Forders" \
      -H "accept: application/json" -H "Content-Type: application/json" \
-     -d "[ { \"@type\": \"String\",\"@value\": \"select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId limit 100\"}]"
+     -d "[ { \"@type\": \"String\",\"@value\": \"select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100\"}]"
 ```
 
 You should see outputs similar to the following.
@@ -381,6 +395,8 @@ You should see outputs similar to the following.
 ...
 ```
 
+### Swagger UI
+
 You can also execute the query using the Swagger UI. The Swagger UI URLs can be obtained by running `show_bundle -long` as follows.
 
 ```bash
@@ -406,13 +422,13 @@ Output:
 ...
 ```
 
-Go to one fo the Swagger UI URLs and enter the following and click on the **Execute** button.
+Go to one of the Swagger UI URLs and enter the following and click on the **Execute** button.
 
 - argsInBody:
 
 ```json
 [{"@type": "String",
-"@value": "select * from /nw/customers c, /nw/orders o where c.customerId=o.customerId" }]
+"@value": "select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100" }]
 ```
 
 - functionId:
@@ -428,6 +444,112 @@ addon.QueryFunction
 ```
 
 ![Swagger Screenshopt](images/swagger-addon-query-function.png)
+
+### `run_query` Command
+
+You can also execute queries in a simpler way by running the `run_query` script found in the `bin_sh` directory. The following executes the default equi-join query statement we used in the previous examples.
+
+```bash
+cd_app perf_test_wan/bin_sh
+./run_query
+```
+
+You can use `run_query` to target clusters and members. Please see the next section for the usage.
+
+## Useful Scripts
+
+This bundle includes the following additional scripts for your convenience.
+
+### run_clear
+
+```bash
+cd_app perf_test_wan/bin_sh
+run_clear -?
+```
+
+Output:
+
+```console
+NAME
+   run_clear - Execute 'addon.ClearFunction' via the REST API to clear the specified region
+
+SYNOPSIS
+   run_clear [-cluster cluster_name] [-num member_number] [-query "oql_statement"] [-region target_region_path] [-?]
+
+DESCRIPTION
+   Executes 'addon.ClearFunction' via the REST API to clear the specified region.
+
+   By default, the REST API is invoked on the first member of the current cluster. You can target
+   a specific cluster and member using the '-cluster' and '-num' options, respective.
+
+   'addon.ClearFunction' is executed on all members using 'onMembers'. Each member is responsible
+   for clearing their own primary set of partitioned data. If the specified region is a replicated region,
+   then the same effect takes place except that each member clears the entire region. We can do better
+   by having only one member to clear replicated regions. This is an improvement that can be added in the future.
+
+   Note that unlike 'addon.QueryFunction', 'addon.ClearFunction' does not require a target region.
+
+OPTIONS
+   -region region_path
+             The region to clear. Required.
+
+   -cluster cluster_name
+             Cluster name. Default: ny
+
+   -num member_number
+             The number of member to execute the REST API on. Default: 1
+
+DEFAULT
+   ./run_clear -cluster ny -num 1 -region region_path
+```
+
+### run_query
+
+```bash
+cd_app perf_test_wan/bin_sh
+run_query -?
+```
+
+```console
+NAME
+   run_query - Execute 'addon.QueryFunction' via the REST API to execute ad-hoc queries
+
+SYNOPSIS
+   run_query [-cluster cluster_name] [-num member_number] [-region target_region_path] [-query "oql_statement"] [-?]
+
+DESCRIPTION
+   Executes 'addon.QueryFunction' via the REST API to execute ad-hoc queries. If the '-query' option
+   is not specified then it executes the following equi-join query statement.
+
+   select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100
+
+   By default, the REST API is invoked on the first member of the current cluster. You can target
+   a specific cluster and member using the '-cluster' and '-num' options, respective.
+
+   Note that 'addon.QueryFunction' is executed using 'onRegion'. This means the target region to
+   execute the function on must be a partitioned region. This script assigns the target region
+   to the first region path found in the 'from' clause. Optionally, you can specify the target
+   region using the '-region' option.
+
+OPTIONS
+   -query "oql_statement"
+             OQL query statement in double quotes. If this option is not specified then it defaults
+             to the equi-join statement shown above.
+
+   -cluster cluster_name
+             Cluster name. Default: ny
+
+   -num member_number
+             The number of member to execute the REST API on. Default: 1
+
+   -region target_region_path
+             The target region to execute the query, i.e., onRegion. If this option is not specified
+             then this script assigns the first region extracted from the 'from' clause as the target
+             region.
+
+DEFAULT
+   ./run_query -cluster ny -num 1 -query "select distinct * from /nw/customers c, /nw/orders o where c.customerId=o.customerId order by c.customerId limit 100"
+```
 
 ## Teardown
 

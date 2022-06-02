@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+# ========================================================================
+# Copyright (c) 2020-2022 Netcrest Technologies, LLC. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========================================================================
+
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+. $SCRIPT_DIR/.addonenv.sh
+
+EXECUTABLE="`basename $0`"
+
+if [ "$HELP" == "true" ]; then
+cat <<EOF
+
+NAME
+   $EXECUTABLE - Execute 'addon.ClearFunction' via the REST API to clear the specified region
+
+SYNOPSIS
+   $EXECUTABLE [-cluster cluster_name] [-num member_number] [-query "oql_statement"] [-region target_region_path] [-?]
+
+DESCRIPTION
+   Executes 'addon.ClearFunction' via the REST API to clear the specified region.
+
+   By default, the REST API is invoked on the first member of the current cluster. You can target
+   a specific cluster and member using the '-cluster' and '-num' options, respective.
+
+   'addon.ClearFunction' is executed on all members using 'onMembers'. Each member is responsible
+   for clearing their own primary set of partitioned data. If the specified region is a replicated region,
+   then the same effect takes place except that each member clears the entire region. We can do better
+   by having only one member to clear replicated regions. This is an improvement that can be added in the future.
+
+   Note that unlike 'addon.QueryFunction', 'addon.ClearFunction' does not require a target region.
+
+OPTIONS
+   -region region_path
+             The region to clear. Required.
+
+   -cluster cluster_name
+             Cluster name. Default: $CLUSTER
+
+   -num member_number
+             The number of member to execute the REST API on. Default: 1
+             
+DEFAULT
+   ./$EXECUTABLE -cluster $CLUSTER -num $MEMBER_NUM_NO_LEADING_ZERO -region region_path
+
+EOF
+   exit
+fi
+
+TARGET_REGION=$REGION
+if [ "$TARGET_REGION" == "" ]; then
+   echo -e "${CLightRed}ERROR:${CNone} Region path not specified. Use the '-region' option to specify the region to clear."
+   exit 1
+fi
+   
+# If HTTP is disabled, then exit
+MEMBER_HTTP_ENABLED=`getClusterProperty "http.enabled" $DEFAULT_MEMBER_HTTP_ENABLED`
+if [ "$MEMBER_HTTP_ENABLED" != "true" ]; then
+   echo -e "${CLightRed}ERROR:${CNone} HTTP URL disabled. Please set 'http.enabled=true' in the following file and restart the cluster."
+   echo "   $CLUSTER_DIR/etc/cluster.properties"
+   exit 1
+fi
+
+# --- Begin: set target member ---
+
+# Determine host name
+NODE=`getOsNodeName`
+OS_ENV=`getOsEnv $NODE`
+MEMBER_PREFIX=`getMemberPrefix`
+if [ "$OS_ENV" == "hh" ]; then
+   NODE_LOCAL=`getOsNodeName`
+else
+   NODE=${NODE_NAME_PREFIX}-$MEMBER_NUM
+   NODE_LOCAL=`getOsNodeName $NODE`
+fi
+HOSTNAME_FOR_CLIENTS=`getClusterProperty "cluster.hostnameForClients" "$NODE"`
+
+# Determine port number
+MEMBER_HTTP_START_PORT=`getClusterProperty "http.startPort" $DEFAULT_MEMBER_HTTP_START_PORT`
+let HTTP_PORT=MEMBER_HTTP_START_PORT+MEMBER_NUM_NO_LEADING_ZERO-1
+
+# Set target member
+TARGET_MEMBER="$HOSTNAME_FOR_CLIENTS:$HTTP_PORT"
+
+# --- End: set target member ---
+
+echo ""
+echo "Executing addon.ClearFunction cluster on $CLUSTER - $TARGET_MEMBER"
+echo "   Region: $TARGET_REGION"
+echo ""
+
+#[{"@type": "String",
+#"@value": "/nw/customers"}
+#]
+
+curl -X POST "http://$TARGET_MEMBER/geode/v1/functions/addon.ClearFunction" \
+     -H  "accept: application/json;charset=UTF-8" -H  "Content-Type: application/json" \
+     -d "[{\"@type\": \"String\",\"@value\": \"$TARGET_REGION\"}]"
+
+echo ""
+echo "Executed addon.ClearFunction on cluster $CLUSTER - $TARGET_MEMBER"
+echo ""
