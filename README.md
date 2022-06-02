@@ -554,7 +554,7 @@ DEFAULT
 ## Teardown
 
 ```bash
-# Stop all custers in the workspace - '-all' removes both members and locators
+# Stop all custers in the workspace - '-all' stops both members and locators
 stop_workspace -all
 ```
 
