@@ -6,6 +6,29 @@ To understand how the clusters are configured, please see the following WAN exam
 
 [Geode/GemFire WAN Example](https://github.com/padogrid/padogrid/wiki/Geode-WAN-Example)
 
+## Table of Contents
+
+- [Installing Bundle](#installing-bundle)
+- [Use Case](#use-case)
+- [Bundle Contents](#bundle-contents)
+- [Startup Sequence](#startup-sequence)
+  - [1. Switch Workspace](#1-switch-workspace)
+  - [2. Start Clusters](#2-start-clusters)
+  - [3. Monitor Clusters](#3-monitor-clusters)
+- [Test Cases](#test-cases)
+  - [Test Case 1. Parallel Gateway - Region `summary`](#test-case-1-parallel-gateway---region-summary)
+  - [Test Case 2. Parallel Gateway - Region `map1`](#test-case-2-parallel-gateway---region-map1)
+  - [Test Case 3. Serial Gateway - Region `map2`](#test-case-3-serial-gateway---region-map2)
+  - [Test Case 4. Parallel Gateway - Co-located Regions `/nw/customers` and `/nw/orders`](#test-case-4-parallel-gateway---co-located-regions-nwcustomers-and-nworders)
+    - [REST API](#rest-api)
+    - [Swagger UI](#swagger-ui)
+    - [`run_query` Command](#run_query-command)
+ - [Useful Scripts](#useful-scripts)
+   - [run_clear](#run_clear)
+   - [run_query](#run_query)
+ - [Teardown](#teardown)
+ - [References](#references)
+
 ## Installing Bundle
 
 Install the bundle as a workspace by executing one of the following:
