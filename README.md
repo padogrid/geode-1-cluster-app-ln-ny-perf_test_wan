@@ -259,28 +259,28 @@ Content of `cache.xml`
 
 ```xml
 ...
-	<region-attributes id="customerIdentityKey">
-		<partition-attributes colocated-with="/nw/customers">
-			<partition-resolver>
-				<class-name>org.apache.geode.addon.cluster.cache.IdentityKeyPartitionResolver</class-name>
-				<parameter name="indexes">
-					<string>1</string>
-				</parameter>
-			</partition-resolver>
-		</partition-attributes>
-	</region-attributes>
-  ...
-  <region name="nw">
-    ...
-    <region name="customers" refid="PARTITION">
-      <region-attributes gateway-sender-ids="ny-to-ln-customers" />
-    </region>
-    ...
-    <region name="orders" refid="PARTITION">
-      <region-attributes refid="customerIdentityKey" gateway-sender-ids="ny-to-ln-customers" />
-    </region>
-  ...
-  </region>
+   <region-attributes id="customerIdentityKey">
+      <partition-attributes colocated-with="/nw/customers">
+         <partition-resolver>
+            <class-name>org.apache.geode.addon.cluster.cache.IdentityKeyPartitionResolver</class-name>
+            <parameter name="indexes">
+               <string>1</string>
+            </parameter>
+         </partition-resolver>
+      </partition-attributes>
+   </region-attributes>
+   ...
+   <region name="nw">
+      ...
+      <region name="customers" refid="PARTITION">
+         <region-attributes gateway-sender-ids="ny-to-ln-customers" />
+      </region>
+      ...
+      <region name="orders" refid="PARTITION">
+         <region-attributes refid="customerIdentityKey" gateway-sender-ids="ny-to-ln-customers" />
+     </region >
+   ...
+   </region>
 ...
 ```
 
