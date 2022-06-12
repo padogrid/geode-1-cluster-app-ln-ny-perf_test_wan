@@ -31,6 +31,8 @@ To understand how the clusters are configured, please see the following WAN exam
 
 ## Installing Bundle
 
+![PadoGrid](https://github.com/padogrid/padogrid/raw/develop/images/padogrid-3d-16x16.png) [*Driven by PadoGrid*](https://github.com/padogrid)
+
 Install the bundle as a workspace by executing one of the following:
 
 ```bash
