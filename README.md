@@ -114,7 +114,7 @@ You should see the following URLs from the command outputs.
 - **ny:** [http://localhost:7070/pulse](http://localhost:7070/pulse)
 - **ln:** [http://localhost:7080/pulse](http://localhost:7080/pulse)
 
-:exclamation: Note that only one instance of Pulse can be viewed per browser. To view both clusters, you need to open two different browsers, e.g., view `ny` from Chrome and `ln` from Firefox.
+:pencil2: Note that only one instance of Pulse can be viewed per browser. To view both clusters, you need to open two different browsers, e.g., view `ny` from Chrome and `ln` from Firefox.
 
 ## Test Cases
 
@@ -224,7 +224,7 @@ Monitor the Pulse instances to view data getting replicated from `ny` to `ln`.
 
 ### Test Case 3. Serial Gateway - Region `map2`
 
-A serial gateway sender funnels region events through a single Geode server in the local cluster to a gateway receiver in the remote Geode cluster. All other servers configured with the same gateway replicate the region events but do not send them to the gateway receiver. They remain standby until a failover occurs in which time one of them assumes the sender responsibility. For this reson, we should limit the number of gateway servers to a small number.
+A serial gateway sender funnels region events through a single Geode server in the local cluster to a gateway receiver in the remote Geode cluster. All other servers configured with the same gateway replicate the region events but do not send them to the gateway receiver. They remain standby until a failover occurs in which time one of them assumes the sender responsibility. For this reson, we should limit the number of serial gateway servers to a small number.
 
 For our test case, only the first two (2) servers are preconfigured with a serial gateway. You can change the number of serial gateway servers by editing the `bin_sh/setenv.sh` file as follows.
 
@@ -333,7 +333,7 @@ k0000003384.000000-0017
 ```
 
 
-:pencil2: *`IdentityKeyPartitionResolver` supports keys with delimiters other than '.' (period),  multiple delimiters, and difference delimiter sequences.*
+:pencil2: *`IdentityKeyPartitionResolver` supports keys with delimiters other than '.' (period),  multiple delimiters, and custom delimiter sequences.*
 
 Note that the `/nw/customers` region is not configured with the `customerIdentityKey` region attributes. This is because the routing keys are customer IDs, and customer IDs are actual keys for the `/nw/customers` region. If we have configured the `/nw/customers` with the same `customerIdentityKey` region attributes, then we will see the following error message in the member log files.
 
@@ -341,7 +341,7 @@ Note that the `/nw/customers` region is not configured with the `customerIdentit
 java.lang.IllegalStateException: Region specified in 'colocated-with' (/nw/customers) for region /nw/customers does not exist. It should be created before setting 'colocated-with' attribute for this region.
 ```
 
-Before we can ingest mock data into the /nw/customers` and `/nw/orders` regions, we need to run the `build_app` script to download the `javafaker` package.
+Before we can ingest mock data into the `/nw/customers` and `/nw/orders` regions, we need to run the `build_app` script to download the `javafaker` package required by `perf_test` for generating mock data.
 
 ```bash
 cd_app perf_test_wan/bin_sh
