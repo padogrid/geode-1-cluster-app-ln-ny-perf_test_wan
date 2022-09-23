@@ -18,6 +18,9 @@ buildNumber.properties
 # vscode
 workspace.code-workspace
 
+# Jupyter
+.ipynb_checkpoints
+
 # PadoGrid workspace
 /.addonenv.sh
 /initenv.sh
@@ -34,6 +37,7 @@ plugins
 #apps
 #clusters
 docker
+groups
 k8s
 pods
 

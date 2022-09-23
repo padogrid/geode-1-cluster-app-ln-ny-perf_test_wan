@@ -96,6 +96,24 @@ start_cluster -cluster ny
 start_cluster -cluster ln
 ```
 
+You can also optionally group the clusters to manage them with a single command. The following example creates a group named `wan` and adds both clusters it.
+
+```bash
+create_group -group wan -product geode -count 0
+add_cluster -group wan -cluster ny
+add_cluster -group wan -cluster ln
+```
+
+The group you created can be managed using the `*_grroup` commands as follows.
+
+```bash
+# Switch to the wan group
+switch_group wan
+
+# Start all clusters beloning to the current group
+start_group
+```
+
 ### 3. Monitor Clusters
 
 The clusters can be monitored in a number of ways, i.e., by Pulse, gfsh, VSD, JMX, Grafana, geode-addon, etc. Let's use Pulse for our example. You can view the gateway sender activities from Pulse. To get the Pulse URLs for both clusters run the following:
@@ -107,6 +125,9 @@ show_cluster -all
 # View clusters individually
 show_cluster -long -cluster ny
 show_cluster -long -cluster ln
+
+# If you created group, then 'show_group' also displays both clusters
+show_group -long
 ```
 
 You should see the following URLs from the command outputs.
