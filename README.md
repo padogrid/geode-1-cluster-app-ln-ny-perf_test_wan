@@ -82,11 +82,11 @@ Add a locator and two (2) members to both clusters. You can add more members if 
 ```bash
 # ny
 switch_cluster ny
-add_locator; add_member; add_member
+add_locator; add_member -count 2
 
 # ln
 switch_cluster ln
-add_locator; add_member; add_member
+add_locator; add_member -count 2
 ```
 
 Run the clusters by executing one of the following options.
@@ -100,7 +100,7 @@ start_cluster -cluster ny
 start_cluster -cluster ln
 ```
 
-You can also optionally group the clusters to manage them with a single command. The following example creates a group named `wan` and adds both clusters it.
+You can also optionally group the clusters to manage them with a single command. The following example creates a group named `wan` and adds both clusters to it.
 
 ```bash
 create_group -group wan -product geode -count 0
@@ -177,7 +177,7 @@ The `perf_test_wan` app connects to the `ny` cluster so the `ny` cluster is the 
 Change directory into the `perf_test_wan`'s `bin_sh` directory.
 
 ```bash
-cd_app perf_test_wan; cd bin_sh
+cd_app perf_test_wan/bin_sh
 ```
 
 First, ingest data into the `eligibility` and `profile` regions. 
@@ -214,7 +214,7 @@ Change the locator port number from 10333 (ny) to 10344 (ln).
 Run `test_tx` as before.
 
 ```bash
-cd bin_sh
+cd_app perf_test_wan/bin_sh
 ./test_tx -run
 ```
 
@@ -473,9 +473,11 @@ Output:
 ...
 ```
 
-Go to one of the Swagger UI URLs and enter the following and click on the **Execute** button.
+Go to one of the Swagger UI URLs and select **POST /v1/functions/{fuctionId}**.
 
-- argsInBody:
+Enter the following and click on the **Execute** button.
+
+- argsInBody or Request body:
 
 ```json
 [{"@type": "String",
