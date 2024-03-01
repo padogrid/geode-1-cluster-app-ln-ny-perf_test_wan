@@ -3,7 +3,7 @@
 ---
 
 <!-- Platforms -->
-[![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS) [![VM](https://github.com/padogrid/padogrid/wiki/images/padogrid-vm.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-VM) [![Docker](https://github.com/padogrid/padogrid/wiki/images/padogrid-docker.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Docker) [![Kubernetes](https://github.com/padogrid/padogrid/wiki/images/padogrid-kubernetes.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Kubernetes)
+[![PadoGrid 1.x](https://github.com/padogrid/padogrid/wiki/images/padogrid-padogrid-1.x.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-PadoGrid-1.x) [![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS) [![VM](https://github.com/padogrid/padogrid/wiki/images/padogrid-vm.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-VM) [![Docker](https://github.com/padogrid/padogrid/wiki/images/padogrid-docker.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Docker) [![Kubernetes](https://github.com/padogrid/padogrid/wiki/images/padogrid-kubernetes.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Kubernetes)
 
 # Geode/GemFire WAN
 
@@ -17,7 +17,9 @@ To understand how the clusters are configured, please see the following WAN exam
 
 - [Installing Bundle](#installing-bundle)
 - [Use Case](#use-case)
+- [Required Software](#required-software)
 - [Bundle Contents](#bundle-contents)
+- [Configuring Bundle Environment](#configuring-bundle-environment)
 - [Startup Sequence](#startup-sequence)
   - [1. Switch Workspace](#1-switch-workspace)
   - [2. Start Clusters](#2-start-clusters)
@@ -54,6 +56,11 @@ In this use case, two (2) local clusters are configured to replicate select  Geo
 
 ![WAN Diagram](images/wan-ny-ln.png)
 
+## Required Software
+
+- Maven 3.x
+- Geode 1.x or GemFire 9.x/10.x
+
 ## Bundle Contents
 
 ```console
@@ -63,6 +70,26 @@ apps
 clusters
 ├── ln
 └── ny
+```
+
+## Configuring Bundle Environment
+
+Make sure you have all the required products installed.
+
+```bash
+# To use Geode:
+install_padogrid -product geode
+update_padogrid -product geode
+
+# To use GemFire:
+# GemFire must be downloaded manually from the their website.
+# The install_padogrid usage provides the download link.
+install_padogrid -?
+# Upon download, install it in $PADOGRID_ENV_BASE_PATH/products directory.
+# For example, the following installs GemFire 10.1.0.
+tar -C $PADOGRID_ENV_BASE_PATH/products -xzf ~/Downloads/vmware-gemfire-10.1.0.tgz
+# Update the workspace environment with the installed GemFire version.
+update_padogrid -product gemfire
 ```
 
 ## Startup Sequence
@@ -114,7 +141,7 @@ The group you created can be managed using the `*_grroup` commands as follows.
 # Switch to the wan group
 switch_group wan
 
-# Start all clusters beloning to the current group
+# Start all clusters belonging to the current group
 start_group
 ```
 
@@ -139,7 +166,7 @@ You should see the following URLs from the command outputs.
 - **ny:** [http://localhost:7070/pulse](http://localhost:7070/pulse)
 - **ln:** [http://localhost:7080/pulse](http://localhost:7080/pulse)
 
-:pencil2: Note that only one instance of Pulse can be viewed per browser. To view both clusters, you need to open two different browsers, e.g., view `ny` from Chrome and `ln` from Firefox.
+✏️  Note that only one instance of Pulse can be viewed per browser. To view both clusters, you need to open two different browsers, e.g., view `ny` from Chrome and `ln` from Firefox.
 
 ## Test Cases
 
@@ -170,7 +197,7 @@ Content of `cache.xml`:
       
 There are three (3) regions configured to store co-located data: `eligibility`, `profile`, and `summary`. The `eligibility` and `profile` regions store member group benefit information. The `summary` region stores member group summary information which is aggregated by invoking [`EligFunction`](https://github.com/padogrid/padogrid/blob/develop/geode-addon-core/src/test/java/org/apache/geode/addon/test/perf/EligFunction.java) via `FunctionService.onRegion()`. `EligFunction` aggregates data from the co-located regions, `eligibility` and `profile`.
 
-:pencil2: The included `perf_test_wan` app is the same `perf_test` app that you can also install by running the `create_app` command. There are no configuration differences between the two. Either one will properly populate data into both clusters.
+✏️  The included `perf_test_wan` app is the same `perf_test` app that you can also install by running the `create_app` command. There are no configuration differences between the two. Either one will properly populate data into both clusters.
 
 The `perf_test_wan` app connects to the `ny` cluster so the `ny` cluster is the sender and `ln` is the receiver.
 
@@ -358,7 +385,7 @@ k0000003384.000000-0017
 ```
 
 
-:pencil2: *`IdentityKeyPartitionResolver` supports keys with delimiters other than '.' (period),  multiple delimiters, and custom delimiter sequences.*
+✏️ *`IdentityKeyPartitionResolver` supports keys with delimiters other than '.' (period),  multiple delimiters, and custom delimiter sequences.*
 
 Note that the `/nw/customers` region is not configured with the `customerIdentityKey` region attributes. This is because the routing keys are customer IDs, and customer IDs are actual keys for the `/nw/customers` region. If we have configured the `/nw/customers` with the same `customerIdentityKey` region attributes, then we will see the following error message in the member log files.
 
@@ -498,7 +525,7 @@ addon.QueryFunction
 
 ![Swagger Screenshopt](images/swagger-addon-query-function.png)
 
-### `run_query` Command
+### `run_query`
 
 You can also execute queries in a simpler way by running the `run_query` script found in the `bin_sh` directory. The following executes the default equi-join query statement we used in the previous examples.
 
@@ -513,11 +540,11 @@ You can use `run_query` to target clusters and members. Please see the next sect
 
 This bundle includes the following additional scripts for your convenience.
 
-### run_clear
+### `run_clear`
 
 ```bash
 cd_app perf_test_wan/bin_sh
-run_clear -?
+./run_clear -?
 ```
 
 Output:
